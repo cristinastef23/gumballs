@@ -1,47 +1,50 @@
-<div id="physics-sandbox" style="width: 100%; height: 450px; position: relative; overflow: hidden; border-radius: 12px; background: ffffff;"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; }
+    #physics-sandbox { width: 100%; height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="physics-sandbox"></div>
+  <script src="https://cloudflare.com"></script>
+  <script>
+    const container = document.getElementById('physics-sandbox');
+    const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint } = Matter;
+    const w = window.innerWidth || 800;
+    const h = window.innerHeight || 500;
 
-<script src="https://cloudflare.com"></script>
-<script>
-window.addEventListener('load'
-                        , function() {
-  const container = document.getElementById('physics-sandbox');
-  const { Engine, Render, Runner, Bodies, Composite, Mouse, MouseConstraint } = Matter;
+    const engine = Engine.create();
+    const render = Render.create({
+      element: container,
+      engine: engine,
+      options: { width: w, height: h, wireframes: false, background: 'transparent' }
+    });
 
-  const engine = Engine.create();
-  const render = Render.create({
-    element: container,
-    engine: engine,
-    options: {
-      width: container.clientWidth,
-      height: container.clientHeight,
-      wireframes: false,
-      background: 'transparent'
-    }
-  });
+    const walls = [
+      Bodies.rectangle(w / 2, h + 25, w, 50, { isStatic: true }),
+      Bodies.rectangle(-25, h / 2, 50, h, { isStatic: true }),
+      Bodies.rectangle(w + 25, h / 2, 50, h, { isStatic: true })
+    ];
 
-  // Create floor and invisible walls so objects stay inside
-  const w = container.clientWidth;
-  const h = container.clientHeight;
-  const walls = [
-    Bodies.rectangle(w / 2, h + 25, w, 50, { isStatic: true }), // Floor
-    Bodies.rectangle(-25, h / 2, 50, h, { isStatic: true }),    // Left wall
-    Bodies.rectangle(w + 25, h / 2, 50, h, { isStatic: true })  // Right wall
-  ];
+    const items = [
+      Bodies.circle(w * 0.3, 50, 40, { restitution: 0.75, render: { fillStyle: '#ff6b6b' } }),
+      Bodies.rectangle(w * 0.5, 20, 80, 50, { restitution: 0.7, render: { fillStyle: '#4ecdc4' } }),
+      Bodies.circle(w * 0.7, 80, 45, { restitution: 0.8, render: { fillStyle: '#ffe66d' } })
+    ];
 
-  // Add falling objects (Replace colors or add sprite textures)
-  const item1 = Bodies.circle(w * 0.3, 50, 35, { restitution: 0.7, render: { sprite: { texture: 'https://apple-alpaca-l9ps.squarespace.com/config/asset-library/file-details/b757d98b-fead-431e-bd63-849b64265dad', xScale: 0.5, yScale: 0.5 } } });
-  const item2 = Bodies.rectangle(w * 0.5, 20, 80, 50, { restitution: 0.6, render: { sprite: { texture: 'https://apple-alpaca-l9ps.squarespace.com/config/asset-library/file-details/c25634c3-90af-4ac3-b8cc-fafa3cacfcd7', xScale: 0.5, yScale: 0.5 } });
-  const item3 = Bodies.circle(w * 0.7, 80, 40, { restitution: 0.8, render: { sprite: { texture: 'https://apple-alpaca-l9ps.squarespace.com/config/asset-library/file-details/4b9ce2f7-17d1-4981-8a85-22e36b03a38d', xScale: 0.5, yScale: 0.5 } });
+    const mouse = Mouse.create(render.canvas);
+    const mouseConstraint = MouseConstraint.create(engine, {
+      mouse: mouse,
+      constraint: { stiffness: 0.2, render: { visible: false } }
+    });
 
-  // Enable mouse and touch dragging
-  const mouse = Mouse.create(render.canvas);
-  const mouseConstraint = MouseConstraint.create(engine, {
-    mouse: mouse,
-    constraint: { stiffness: 0.2, render: { visible: false } }
-  });
-
-  Composite.add(engine.world, [...walls, item1, item2, item3, mouseConstraint]);
-  Render.run(render);
-  Runner.run(Runner.create(), engine);
-});
-</script>
+    Composite.add(engine.world, [...walls, ...items, mouseConstraint]);
+    Render.run(render);
+    Runner.run(Runner.create(), engine);
+  </script>
+</body>
+</html>
